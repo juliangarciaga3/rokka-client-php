@@ -6,6 +6,10 @@ This project tries to follow [Semantic Versioning](http://semver.org/) since the
 
 This document mainly describes API changes important to users of this library.
 
+## 1.4.0 - unreleased
+
+* Added `\Rokka\Client\Image::uploadSourceImageByUrl($url, $organization = '', $options = null)` for using an URL instead of the image content for adding new images into rokka.
+
 ## 1.3.2 - 2018-06-16
 
 * Fix PHP 5.6 compatibility for `\Rokka\Client\Core\Stack::createFromConfig`
