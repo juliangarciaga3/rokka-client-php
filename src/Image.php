@@ -4,6 +4,7 @@ namespace Rokka\Client;
 
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Uri;
 use Psr\Http\Message\UriInterface;
 use Rokka\Client\Core\DynamicMetadata\DynamicMetadataInterface;
@@ -71,6 +72,19 @@ class Image extends Base
      */
     public function uploadSourceImage($contents, $fileName, $organization = '', $options = null)
     {
+        return $this->uploadSourceImageAsync($contents, $fileName, $organization, $options)->wait();
+    }
+
+    /**
+     * @param string $contents
+     * @param string $fileName
+     * @param string $organization
+     * @param array|null   $options
+     *
+     * @return \GuzzleHttp\Promise\PromiseInterface
+     */
+    public function uploadSourceImageAsync($contents, $fileName, $organization = '', $options = null)
+    {
         if (empty($contents)) {
             throw new \LogicException('You need to provide an image content to be uploaded');
         }
@@ -97,12 +111,17 @@ class Image extends Base
             }
         }
 
-        $contents = $this
-            ->call('POST', self::SOURCEIMAGE_RESOURCE.'/'.$this->getOrganization($organization), ['multipart' => $requestOptions])
-            ->getBody()
-            ->getContents();
+        return $this
+            ->callAsync(
+                'POST',
+                self::SOURCEIMAGE_RESOURCE.'/'.$this->getOrganization($organization),
+                ['multipart' => $requestOptions]
+            )
+            ->then(function (Response $value) {
+                $contents = $value->getBody()->getContents();
 
-        return SourceImageCollection::createFromJsonResponse($contents);
+                return SourceImageCollection::createFromJsonResponse($contents);
+            });
     }
 
     /**
